@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Register</title>
+	<style>
+		body { font-family: Arial, sans-serif; margin: 40px; }
+		.container { max-width: 560px; margin: 0 auto; }
+		.card { background: #f7f9fb; padding: 16px; border-radius: 8px; margin-top: 16px; }
+		input { width: 100%; padding: 10px; margin: 8px 0; }
+		button { padding: 10px 16px; margin-right: 8px; cursor: pointer; }
+		.row { display: flex; gap: 8px; align-items: center; }
+		.small { font-size: 12px; color: #666; }
+		.msg-ok { color: #2e7d32; }
+		.msg-err { color: #c62828; }
+	</style>
+</head>
+<body>
+	<div class="container">
+		<h1>회원가입</h1>
+		<div class="card">
+			<label>아이디</label>
+			<div class="row">
+				<input id="username" placeholder="아이디" />
+				<button id="duplBtn" type="button">중복ID체크</button>
+			</div>
+			<div id="duplMsg" class="small"></div>
+			<label>비밀번호</label>
+			<input id="password1" type="password" placeholder="비밀번호" />
+			<label>비밀번호 확인</label>
+			<input id="password2" type="password" placeholder="비밀번호 확인" />
+			<div id="pwMsg" class="small"></div>
+			<div class="row" style="margin-top:8px;">
+				<button id="submitBtn" disabled>회원가입</button>
+				<a href="/login.html">로그인 페이지로</a>
+			</div>
+		</div>
+	</div>
+	<script src="/front.js"></script>
+	<script>
+		(function(){
+			let lastCheckedUsername = '';
+			let isUsernameAvailable = false;
+			let doPwMatch = false;
+
+			function updateSubmitButton() {
+				const submit = document.getElementById('submitBtn');
+				submit.disabled = !(isUsernameAvailable && doPwMatch);
+			}
+
+			async function checkDuplicate() {
+				const username = document.getElementById('username').value.trim();
+				if (!username) {
+					isUsernameAvailable = false;
+					document.getElementById('duplMsg').textContent = '아이디를 입력하세요.';
+					document.getElementById('duplMsg').className = 'small msg-err';
+					updateSubmitButton();
+					return;
+				}
+				const res = await window.api.duplCheck(username);
+				lastCheckedUsername = username;
+				if (res && res.ok && res.hasOwnProperty('available')) {
+					isUsernameAvailable = !!res.available;
+					document.getElementById('duplMsg').textContent = res.available ? '사용 가능한 아이디입니다.' : '이미 존재하는 아이디입니다.';
+					document.getElementById('duplMsg').className = 'small ' + (res.available ? 'msg-ok' : 'msg-err');
+				} else {
+					isUsernameAvailable = false;
+					document.getElementById('duplMsg').textContent = '중복 체크 실패';
+					document.getElementById('duplMsg').className = 'small msg-err';
+				}
+				updateSubmitButton();
+			}
+
+			function checkPwMatch() {
+				const p1 = document.getElementById('password1').value;
+				const p2 = document.getElementById('password2').value;
+				doPwMatch = !!p1 && p1 === p2;
+				document.getElementById('pwMsg').textContent = doPwMatch ? '비밀번호가 일치합니다.' : '비밀번호가 일치하지 않습니다.';
+				document.getElementById('pwMsg').className = 'small ' + (doPwMatch ? 'msg-ok' : 'msg-err');
+				updateSubmitButton();
+			}
+
+			window.addEventListener('DOMContentLoaded', () => {
+				document.getElementById('duplBtn').addEventListener('click', checkDuplicate);
+				document.getElementById('username').addEventListener('input', () => {
+					// Invalidate previous dupl check when username changes
+					isUsernameAvailable = false;
+					document.getElementById('duplMsg').textContent = '';
+					updateSubmitButton();
+				});
+				document.getElementById('password1').addEventListener('blur', checkPwMatch);
+				document.getElementById('password2').addEventListener('blur', checkPwMatch);
+				document.getElementById('submitBtn').addEventListener('click', async () => {
+					const username = document.getElementById('username').value.trim();
+					const pw = document.getElementById('password1').value;
+					if (!username || !pw) {
+						alert('아이디와 비밀번호를 입력하세요.');
+						return;
+					}
+					if (!isUsernameAvailable || username !== lastCheckedUsername) {
+						alert('중복ID체크를 먼저 진행하세요.');
+						return;
+					}
+					if (!doPwMatch) {
+						alert('비밀번호가 일치하지 않습니다.');
+						return;
+					}
+					const res = await window.api.signup(username, pw);
+					if (res && res.ok) {
+						alert('회원가입 성공! 로그인 페이지로 이동합니다.');
+						location.href = '/login.html';
+					} else {
+						alert(res && res.error ? res.error : '회원가입 실패');
+					}
+				});
+			});
+		})();
+	</script>
+</body>
+</html>
+
+

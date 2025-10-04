@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Welcome</title>
+	<style>
+		body { font-family: Arial, sans-serif; margin: 40px; }
+		.container { max-width: 560px; margin: 0 auto; }
+		h1 { color: #2c3e50; }
+		.header { display: flex; justify-content: space-between; align-items: center; }
+		button { padding: 8px 14px; cursor: pointer; }
+		.card { background: #f7f9fb; padding: 16px; border-radius: 8px; margin-top: 16px; }
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="header">
+			<h1>Welcome <span id="username"></span> 🎉</h1>
+			<button id="logoutBtn">로그아웃</button>
+		</div>
+		<div class="card">
+			<p>로그인에 성공했습니다. </p>
+			<!-- placeholder -->
+			<div id="placeholder">
+				
+				<p>made by Junsoo Park 2023204090</p>
+			</div>
+		</div>
+	</div>
+	<script src="/front.js"></script>
+	<script>
+		window.addEventListener('DOMContentLoaded', async () => {
+			const me = await window.api.me();
+			if (!me.authenticated) {
+				location.href = '/login.html';
+				return;
+			}
+			document.getElementById('username').textContent = me.username;
+				document.getElementById('logoutBtn').addEventListener('click', async () => {
+				await window.api.logout();
+				location.href = '/login.html';
+			});
+				document.getElementById('tokenTestBtn').addEventListener('click', async () => {
+					const token = document.getElementById('tokenInput').value.trim();
+					const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+					const res = await fetch('/api/test', { credentials: 'same-origin', headers });
+					try {
+						const data = await res.json();
+						document.getElementById('testResult').textContent = data.ok ? `OK: ${data.username}` : `ERR(${data.code}): ${data.error}`;
+					} catch (e) {
+						document.getElementById('testResult').textContent = 'ERR: invalid response';
+					}
+				});
+		});
+	</script>
+</body>
+</html>
