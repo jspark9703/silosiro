@@ -37,7 +37,7 @@ app.use(parseCookies);
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-const User = require('./src/db/entity/user');
+const User = require('./src/db/schema/user');
 const users = {
     async findByUsername(username) {
         return await User.findByUsername(username);
@@ -87,7 +87,7 @@ app.get(['/', '/home'], async (req, res, next) => {
     if (!payload || !payload.username) {
         return res.redirect('/login.html');
     }
-    const User = require('./src/db/entity/user');
+    const User = require('./src/db/schema/user');
     try {
         const user = await User.findByUsername(payload.username);
         if (!user) {

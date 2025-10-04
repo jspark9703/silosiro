@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const { getJwtSecret, signToken } = require('../src/jwt');
-const User = require('../src/db/entity/user');
+const User = require('../src/db/schema/user');
 const { setCookie } = require('../src/utils/cookie');
 const router = express.Router();
 

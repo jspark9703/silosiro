@@ -1,5 +1,7 @@
 require('dotenv').config();
 const { Pool } = require('pg');
+const fs = require('fs');
+const path = require('path');
 
 const sslOption = process.env.PGSSL === 'true' ? { rejectUnauthorized: false } : undefined;
 
@@ -24,14 +26,17 @@ const pool = new Pool(poolConfig);
 		try {
 			await client.query('SELECT 1');
 			console.log(`[DB] Connected: host=${poolConfig.host || 'via-URL'} db=${poolConfig.database || '(in-URL)'} ssl=${!!poolConfig.ssl}`);
-            await client.query  (`
-                CREATE TABLE IF NOT EXISTS users (
-                    id SERIAL PRIMARY KEY,
-                    username VARCHAR(64) UNIQUE NOT NULL,
-                    password_hash TEXT NOT NULL,
-                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-                );
-            `);
+			
+			// Read and execute all SQL files from initialize folder
+			const initializeDir = path.join(__dirname, 'sql', 'initailize');
+			const sqlFiles = fs.readdirSync(initializeDir).filter(file => file.endsWith('.sql'));
+			
+			for (const sqlFile of sqlFiles) {
+				const sqlPath = path.join(initializeDir, sqlFile);
+				const sqlContent = fs.readFileSync(sqlPath, 'utf8');
+				console.log(`[DB] Executing schema: ${sqlFile}`);
+				await client.query(sqlContent);
+			}
                 
 		} finally {
             console.log('[DB] Schema initialized');

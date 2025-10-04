@@ -1,5 +1,5 @@
 const express = require('express');
-const User = require('../src/db/entity/user');
+const User = require('../src/db/schema/user');
 const router = express.Router();
 
 function createUserRouter(users, verifyAuthPayload) {
