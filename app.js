@@ -7,7 +7,7 @@ const { createAuthRouter } = require('./routes/auth');
 const { createUserRouter } = require('./routes/user');
 
 const app = express();
-const PORT = 80;
+const PORT = 3000;
 
 
 const JWT_SECRET = process.env.JWT_SECRET ;
