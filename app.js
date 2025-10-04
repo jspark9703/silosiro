@@ -7,7 +7,7 @@ const { createAuthRouter } = require('./routes/auth');
 const { createUserRouter } = require('./routes/user');
 
 const app = express();
-const PORT = 3000;
+const PORT = 80;
 
 
 const JWT_SECRET = process.env.JWT_SECRET ;
@@ -27,7 +27,6 @@ function parseCookies(req, res, next) {
 	next();
 }
 
-// (Deprecated) custom cookie/JWT helpers removed in favor of jsonwebtoken
 
 // Middlewares
 app.use(express.json());
@@ -37,6 +36,25 @@ app.use(parseCookies);
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
+
+const User = require('./src/db/entity/user');
+const users = {
+    async findByUsername(username) {
+        return await User.findByUsername(username);
+    },
+    async create(username, password) {
+        return await User.create(username, password);
+    },
+    async validateUserPassword(username, password) {
+        return await User.validateUserPassword(username, password);
+    },
+    async getAll() {
+        return await User.getAllUsers();
+    },
+    async deleteById(id) {
+        return await User.deleteById(id);
+    }
+};
 
 // Routers
 const requireAuth = createRequireAuth(users, JWT_SECRET);

@@ -12,16 +12,29 @@ const poolConfig = {
 	ssl: sslOption,
 };
 
+
 const pool = new Pool(poolConfig);
 
 // Log DB connectivity status
 (async () => {
+    
+    
 	try {
 		const client = await pool.connect();
 		try {
 			await client.query('SELECT 1');
 			console.log(`[DB] Connected: host=${poolConfig.host || 'via-URL'} db=${poolConfig.database || '(in-URL)'} ssl=${!!poolConfig.ssl}`);
+            await client.query  (`
+                CREATE TABLE IF NOT EXISTS users (
+                    id SERIAL PRIMARY KEY,
+                    username VARCHAR(64) UNIQUE NOT NULL,
+                    password_hash TEXT NOT NULL,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                );
+            `);
+                
 		} finally {
+            console.log('[DB] Schema initialized');
 			client.release();
 		}
 	} catch (err) {
@@ -32,7 +45,6 @@ const pool = new Pool(poolConfig);
 pool.on('error', (err) => {
 	console.error('[DB] Pool error:', err && err.message ? err.message : err);
 });
-
 
 
 

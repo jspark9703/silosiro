@@ -4,40 +4,21 @@ const bcrypt = require('bcryptjs');
 // user 객체 정의
 class User {
     constructor(id, username, passwordHash = null, createdAt = null) {
-        this.initialized = false;
         this.id = id;
         this.username = username;
         this.passwordHash = passwordHash;
         this.createdAt = createdAt;
     }
-    async initialize() {
-        await this.ensureSchema();
-        this.initialized = true;
-    }
+
     // 인스턴스 메서드들
     getPublicInfo() {
-        if (!this.initialized) {
-            throw new Error('User not initialized');
-        }
         return {
             id: this.id,
             username: this.username,
             createdAt: this.createdAt
         };
     }
-
-    // 정적 메서드들 - 데이터베이스와의 상호작용
-static async ensureSchema() {
-	await pool.query(`
-		CREATE TABLE IF NOT EXISTS users (
-			id SERIAL PRIMARY KEY,
-			username VARCHAR(64) UNIQUE NOT NULL,
-			password_hash TEXT NOT NULL,
-			created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-		);
-	`);
-}
-
+    
     async validatePassword(password) {
         if (!this.passwordHash) return false;
         return await bcrypt.compare(password, this.passwordHash);
