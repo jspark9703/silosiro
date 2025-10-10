@@ -1,7 +1,6 @@
 require('dotenv').config();
 const express = require('express');
 const { getJwtSecret, signToken } = require('../src/jwt');
-const User = require('../src/db/schema/user');
 const { setCookie } = require('../src/utils/cookie');
 const router = express.Router();
 
@@ -28,7 +27,7 @@ function createAuthRouter(users, jwtSecret, requireAuth) {
 			return res.status(400).json({ ok: false, error: 'username and password required' });
 		}
 		try {
-			const user = await User.create(username, password);
+			const user = await users.create(username, password);
 			return res.json({ ok: true, user: user.getPublicInfo() });
 		} catch (err) {
 			if (err && (err.code === 'USER_EXISTS' || /duplicate key/.test(String(err.message)))) {
@@ -45,7 +44,7 @@ function createAuthRouter(users, jwtSecret, requireAuth) {
 			return res.status(400).json({ ok: false, error: 'username and password required' });
 		}
 		try {
-			const user = await User.validateUserPassword(username, password);
+			const user = await users.validateUserPassword(username, password);
 			if (!user) {
 				return res.status(401).json({ ok: false, error: 'invalid credentials' });
 			}

@@ -11,6 +11,3 @@ jest.resetModules();
 // 글로벌 테스트 헬퍼 함수들
 global.sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-// 콘솔 로그 억제 (필요시)
-// console.log = jest.fn();
-// console.error = jest.fn();
