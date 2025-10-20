@@ -16,42 +16,32 @@
 <body>
 	<div class="container">
 		<div class="header">
-			<h1>Welcome <span id="username"></span> 🎉</h1>
+			<h1>Welcome  🎉</h1>
 			<button id="logoutBtn">로그아웃</button>
 		</div>
 		<div class="card">
 			<p>로그인에 성공했습니다. </p>
-			<!-- placeholder -->
-			<div id="placeholder">
-				
-				<p>made by Junsoo Park 2023204090</p>
-			</div>
+			<p>접속한 ID: <strong id="userId"></strong></p>
+			<p>제출자: <strong>Junsoo Park (2023204090)</strong></p>
 		</div>
 	</div>
 	<script src="/front.js"></script>
 	<script>
 		window.addEventListener('DOMContentLoaded', async () => {
+			console.log('DOMContentLoaded');
+			
 			const me = await window.api.me();
 			if (!me.authenticated) {
 				location.href = '/login.html';
 				return;
 			}
-			document.getElementById('username').textContent = me.username;
-				document.getElementById('logoutBtn').addEventListener('click', async () => {
+			console.log('me', me);
+			document.getElementById('userId').textContent = me.user;
+			document.getElementById('logoutBtn').addEventListener('click', async () => {
 				await window.api.logout();
 				location.href = '/login.html';
 			});
-				document.getElementById('tokenTestBtn').addEventListener('click', async () => {
-					const token = document.getElementById('tokenInput').value.trim();
-					const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-					const res = await fetch('/api/test', { credentials: 'same-origin', headers });
-					try {
-						const data = await res.json();
-						document.getElementById('testResult').textContent = data.ok ? `OK: ${data.username}` : `ERR(${data.code}): ${data.error}`;
-					} catch (e) {
-						document.getElementById('testResult').textContent = 'ERR: invalid response';
-					}
-				});
+				
 		});
 	</script>
 </body>

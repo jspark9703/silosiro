@@ -22,11 +22,11 @@ function createUserRouter(users, verifyAuthPayload) {
 		if (!payload || !payload.username) {
 			return res.json({ ok: true, authenticated: false });
 		}
-		const user = await User.findByUsername(payload.username);
+		const user = payload.username;
 		if (!user) {
 			return res.json({ ok: true, authenticated: false });
 		}
-		return res.json({ ok: true, authenticated: true, user: user.getPublicInfo() });
+		return res.json({ ok: true, authenticated: true, user: user });
 	});
 
 	// GET /:username (basic user info)
