@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
-const { verifyToken, getJwtSecret, signToken } = require('./src/jwt');
+const { verifyToken } = require('./src/jwt');
 const { createRequireAuth } = require('./src/middleware');
 const { createAuthRouter } = require('./routes/auth');
 const { createUserRouter } = require('./routes/user');
@@ -85,15 +85,6 @@ app.get(['/', '/home'], async (req, res, next) => {
         }
     }
     if (!payload || !payload.username) {
-        return res.redirect('/login.html');
-    }
-    const User = require('./src/db/entity/user');
-    try {
-        const user = await User.findByUsername(payload.username);
-        if (!user) {
-            return res.redirect('/login.html');
-        }
-    } catch (e) {
         return res.redirect('/login.html');
     }
     return res.sendFile(path.join(__dirname, 'public', 'index.html'));

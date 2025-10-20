@@ -29,7 +29,11 @@ function createAuthRouter(users, jwtSecret, requireAuth) {
 		}
 		try {
 			const user = await User.create(username, password);
-			return res.json({ ok: true, user: user.getPublicInfo() });
+			// 회원가입 후 자동 로그인 처리
+			const secret = getJwtSecret(jwtSecret);
+			const token = signToken({ userId: user.id, username: user.username }, secret, { expiresIn: '1d' });
+			setCookie(res, 'token', token, { httpOnly: true, sameSite: 'Lax', path: '/' });
+			return res.json({ ok: true, username: user.username, token });
 		} catch (err) {
 			if (err && (err.code === 'USER_EXISTS' || /duplicate key/.test(String(err.message)))) {
 				return res.status(409).json({ ok: false, error: 'username already exists' });
