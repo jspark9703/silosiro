@@ -16,4 +16,22 @@ function setCookie(res, name, value, options = {}) {
 	res.appendHeader('Set-Cookie', cookieStr);
 }
 
-module.exports = { setCookie };
+
+// 쿠키 파싱 미들웨어 (직접 구현)
+function parseCookies(req, res, next) {
+	const cookieHeader = req.headers.cookie;
+	req.cookies = {};
+	if (cookieHeader) {
+		const cookies = cookieHeader.split(';');
+		cookies.forEach(cookie => {
+			const [name, ...rest] = cookie.trim().split('=');
+			const value = rest.join('=');
+			req.cookies[name] = decodeURIComponent(value);
+		});
+	}
+	if (req.cookies.token) {
+		return req.cookies.token;
+	}
+	return null;
+}
+module.exports = { setCookie, parseCookies };
